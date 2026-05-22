@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>ご予約 | 環 -wa-</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500&family=Cormorant+Garamond:ital,wght@0,300;0,400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --br:     #5C3423;
+      --br-dk:  #4a2a1b;
+      --br-md:  #8B6A52;
+      --be:     #F5E6CC;
+      --be-lt:  #FFF2DE;
+      --go:     #D4A96A;
+      --sep:    rgba(92,52,35,0.1);
+      --err:    #c0392b;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'Noto Serif JP', serif;
+      background: var(--be);
+      color: var(--br);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Page header ───────────────────────────────────────────────── */
+    .page-hd {
+      background: white;
+      text-align: center;
+      padding: 28px 16px 22px;
+      border-bottom: 1px solid var(--sep);
+    }
+    .page-hd-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 9.5px;
+      letter-spacing: 0.55em;
+      color: var(--go);
+      margin-bottom: 7px;
+    }
+    .page-hd-ja {
+      font-size: 19px;
+      letter-spacing: 0.28em;
+      font-weight: 500;
+    }
+    .page-hd-line {
+      width: 32px;
+      height: 1px;
+      background: var(--go);
+      margin: 11px auto 0;
+    }
+
+    /* ── Notice ────────────────────────────────────────────────────── */
+    #notice {
+      background: var(--be-lt);
+      border-bottom: 1px solid rgba(212,169,106,0.3);
+      padding: 20px 18px 22px;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .notice-lbl {
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      color: var(--go);
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .notice-lbl::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: rgba(212,169,106,0.35);
+    }
+    .notice-txt {
+      font-size: 11px;
+      color: var(--br-md);
+      line-height: 2;
+      letter-spacing: 0.02em;
+    }
+    .notice-txt + .notice-txt { margin-top: 12px; }
+    .notice-line-btn { display: inline-block; margin-top: 16px; }
+
+    /* ── Booking wrapper ────────────────────────────────────────────── */
+    #booking {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    /* ── Sections (accordion) ───────────────────────────────────────── */
+    .bsec {
+      background: white;
+      border-bottom: 1px solid var(--sep);
+      transition: opacity 0.25s;
+    }
+    .bsec.locked {
+      opacity: 0.38;
+      pointer-events: none;
+    }
+    .bsec-hd {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 18px 18px;
+      min-height: 62px;
+      cursor: default;
+    }
+    .bsec.done .bsec-hd { cursor: pointer; }
+    .bsec.done .bsec-hd:active { background: rgba(92,52,35,0.02); }
+
+    /* Number badge */
+    .bsec-badge {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: rgba(92,52,35,0.18);
+      color: var(--br-md);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 13px;
+      flex-shrink: 0;
+      transition: background 0.3s, color 0.3s;
+      position: relative;
+    }
+    .bsec.active .bsec-badge {
+      background: var(--br);
+      color: white;
+    }
+    .bsec.done .bsec-badge {
+      background: var(--go);
+      color: white;
+    }
+    .badge-num { transition: opacity 0.2s; }
+    .badge-chk {
+      position: absolute;
+      font-size: 12px;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .bsec.done .badge-num { opacity: 0; }
+    .bsec.done .badge-chk { opacity: 1; }
+
+    .bsec-title {
+      font-size: 12.5px;
+      letter-spacing: 0.12em;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .bsec-val {
+      flex: 1;
+      font-size: 11px;
+      color: var(--br-md);
+      text-align: right;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      opacity: 0;
+      transition: opacity 0.3s;
+      letter-spacing: 0.03em;
+    }
+    .bsec.done .bsec-val { opacity: 1; }
+    .bsec-edit {
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      color: var(--br-md);
+      background: none;
+      border: 1px solid rgba(92,52,35,0.22);
+      border-radius: 20px;
+      padding: 4px 10px;
+      cursor: pointer;
+      font-family: inherit;
+      flex-shrink: 0;
+      display: none;
+      transition: background 0.15s;
+    }
+    .bsec.done .bsec-edit { display: block; }
+    .bsec-edit:hover { background: rgba(92,52,35,0.06); }
+
+    /* Accordion body */
+    .bsec-body {
+      display: grid;
+      grid-template-rows: 0fr;
+      transition: grid-template-rows 0.42s cubic-bezier(0.4,0,0.2,1),
+                  opacity 0.35s ease;
+      opacity: 0;
+    }
+    .bsec.active .bsec-body {
+      grid-template-rows: 1fr;
+      opacity: 1;
+    }
+    .bsec-inner { overflow: hidden; }
+    .bsec-pad { padding: 2px 18px 28px; }
+
+    /* ── Menu cards ─────────────────────────────────────────────────── */
+    .menu-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .mcard {
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 1.5px solid rgba(92,52,35,0.13);
+      box-shadow: 0 4px 18px rgba(92,52,35,0.1), 0 1px 4px rgba(92,52,35,0.06);
+      transition: transform 0.22s ease, box-shadow 0.22s ease, border 0.15s;
+      -webkit-tap-highlight-color: transparent;
+      position: relative;
+      user-select: none;
+    }
+    .mcard:hover { transform: translateY(-2px); box-shadow: 0 7px 24px rgba(92,52,35,0.16); }
+    .mcard.selected { border: 2px solid var(--br); box-shadow: 0 7px 24px rgba(92,52,35,0.22); }
+    .mcard-img-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      background: var(--be);
+    }
+    .mcard-img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      filter: sepia(15%) contrast(1.05);
+      transition: transform 0.3s ease;
+      display: block;
+    }
+    .mcard:hover .mcard-img { transform: scale(1.04); }
+    .mcard-body { padding: 12px 11px; border-top: 1px solid rgba(92,52,35,0.07); }
+    .mcard-en { font-size: 8px; letter-spacing: 0.32em; color: var(--go); margin-bottom: 3px; }
+    .mcard-ja { font-size: 12px; letter-spacing: 0.15em; font-weight: 500; margin-bottom: 2px; }
+    .mcard-price {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 15px; font-weight: 300;
+      color: var(--br-md);
+    }
+    .mcard-desc { font-size: 9px; color: var(--br-md); margin-top: 5px; line-height: 1.7; }
+    .mcard-chk {
+      position: absolute; top: 8px; right: 8px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--br); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .mcard.selected .mcard-chk { opacity: 1; }
+
+    /* ── Divider ────────────────────────────────────────────────────── */
+    .sec-divider {
+      height: 1px;
+      background: var(--sep);
+      margin: 24px 0 20px;
+    }
+
+    /* ── Stepper ────────────────────────────────────────────────────── */
+    .stepper-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+    .stepper-row:last-child { margin-bottom: 0; }
+    .stepper-lbl { font-size: 11px; letter-spacing: 0.06em; }
+    .stepper-sub { font-size: 9.5px; color: var(--br-md); margin-top: 2px; }
+    .stepper {
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid rgba(92,52,35,0.2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .stepper-btn {
+      width: 44px; height: 44px;
+      background: var(--be-lt);
+      border: none; cursor: pointer;
+      font-size: 22px; color: var(--br);
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif; font-weight: 300;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .stepper-btn:hover:not(:disabled) { background: rgba(92,52,35,0.09); }
+    .stepper-btn:disabled { color: rgba(92,52,35,0.2); cursor: not-allowed; }
+    .stepper-cnt {
+      width: 52px; text-align: center;
+      font-family: 'Cormorant Garamond', serif; font-size: 22px; font-weight: 300;
+      color: var(--br);
+      border-left: 1px solid var(--sep);
+      border-right: 1px solid var(--sep);
+      user-select: none; padding: 8px 0;
+    }
+
+    /* ── Calendar ───────────────────────────────────────────────────── */
+    .cal-wrap { transition: opacity 0.3s; }
+    .cal-wrap.cal-off { opacity: 0.28; pointer-events: none; }
+
+    .cal-hint {
+      text-align: center; font-size: 10.5px; color: var(--br-md);
+      letter-spacing: 0.04em; margin-bottom: 14px; display: none;
+    }
+    .cal-wrap.cal-off + .cal-hint { display: block; }
+
+    .cal-nav {
+      display: flex; align-items: center;
+      justify-content: space-between; margin-bottom: 14px;
+    }
+    .cal-nav-label {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 16px; font-weight: 400;
+      letter-spacing: 0.08em;
+    }
+    .cal-nav-btn {
+      width: 34px; height: 34px; border-radius: 50%;
+      border: 1px solid rgba(92,52,35,0.2);
+      background: white; cursor: pointer; color: var(--br);
+      font-size: 17px; display: flex; align-items: center; justify-content: center;
+      transition: background 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cal-nav-btn:hover { background: var(--be-lt); }
+    .cal-nav-btn:disabled { opacity: 0.25; cursor: default; }
+
+    .cal-grid {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+    }
+    .cal-dow {
+      text-align: center; font-size: 10px;
+      color: var(--br-md); padding: 4px 0 10px;
+      letter-spacing: 0.04em;
+    }
+    .cal-dow.sun { color: #c0392b; }
+    .cal-dow.sat { color: #3578e5; }
+    .cal-empty { aspect-ratio: 1; }
+    .cal-day {
+      aspect-ratio: 1;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12.5px; border-radius: 50%;
+      cursor: pointer; position: relative;
+      transition: background 0.15s, color 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cal-day:hover { background: rgba(92,52,35,0.1); }
+    .cal-day.sun { color: #c0392b; }
+    .cal-day.sat { color: #3578e5; }
+    .cal-day.disabled {
+      color: rgba(92,52,35,0.22); cursor: default; pointer-events: none;
+    }
+    .cal-day.closed {
+      background: rgba(92,52,35,0.04); color: rgba(92,52,35,0.2);
+    }
+    .cal-day.today::after {
+      content: ''; position: absolute; bottom: 3px; left: 50%;
+      transform: translateX(-50%); width: 4px; height: 4px;
+      border-radius: 50%; background: var(--go);
+    }
+    .cal-day.selected {
+      background: var(--br) !important; color: white !important;
+    }
+    .cal-day.selected::after { display: none; }
+
+    /* ── Time slots ─────────────────────────────────────────────────── */
+    .time-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .tslot {
+      padding: 12px 6px;
+      border: 1.5px solid rgba(92,52,35,0.14);
+      border-radius: 4px; text-align: center;
+      cursor: pointer; background: white;
+      transition: border-color 0.18s, background 0.18s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .tslot:hover { border-color: var(--br); background: var(--be-lt); }
+    .tslot.selected { border: 2px solid var(--br); background: var(--be-lt); }
+    .tslot.blocked {
+      background: rgba(92,52,35,0.03);
+      border-color: rgba(92,52,35,0.07);
+      cursor: default; pointer-events: none;
+    }
+    .tslot-time {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 14.5px; color: var(--br);
+    }
+    .tslot.blocked .tslot-time { color: rgba(92,52,35,0.25); }
+    .tslot-avail {
+      font-size: 9.5px; color: #5a9a58; margin-top: 3px;
+    }
+    .tslot.blocked .tslot-avail { color: rgba(92,52,35,0.3); }
+
+    /* ── Progressive sections (notes + contact) ─────────────────────── */
+    .prog-secs {
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.55s cubic-bezier(0.4,0,0.2,1), opacity 0.4s ease;
+    }
+    .prog-secs.visible { max-height: 1800px; opacity: 1; }
+
+    .prog-sec {
+      background: white;
+      border-bottom: 1px solid var(--sep);
+    }
+    .prog-sec-hd {
+      display: flex; align-items: center; gap: 14px;
+      padding: 18px 18px 0;
+    }
+    .prog-badge {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: var(--br); color: white;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Cormorant Garamond', serif; font-size: 13px;
+      flex-shrink: 0;
+    }
+    .prog-title { font-size: 12.5px; letter-spacing: 0.12em; font-weight: 500; }
+    .prog-body { padding: 16px 18px 28px; }
+
+    /* ── Form fields ────────────────────────────────────────────────── */
+    .field { margin-bottom: 16px; }
+    .field:last-child { margin-bottom: 0; }
+    .field-lbl {
+      display: block; font-size: 9.5px; letter-spacing: 0.1em;
+      color: var(--go); margin-bottom: 7px;
+    }
+    .field-lbl .req { color: var(--err); margin-left: 3px; }
+    .field input, .field textarea {
+      width: 100%; padding: 12px 14px;
+      border: 1px solid rgba(92,52,35,0.2); border-radius: 4px;
+      font-family: 'Noto Serif JP', serif; font-size: 14px;
+      color: var(--br); background: white; outline: none;
+      transition: border-color 0.2s; -webkit-appearance: none; appearance: none;
+    }
+    .field input:focus, .field textarea:focus { border-color: var(--br); }
+    .field input.err, .field textarea.err { border-color: var(--err); }
+    .field textarea { resize: vertical; min-height: 90px; }
+    .field-err { font-size: 10px; color: var(--err); margin-top: 5px; display: none; }
+    .field-err.show { display: block; }
+
+    /* ── Submit ─────────────────────────────────────────────────────── */
+    #submit-area {
+      padding: 24px 18px 60px;
+      background: white;
+    }
+    .btn-reserve {
+      width: 100%; padding: 16px;
+      background: var(--br); color: white; border: none; border-radius: 4px;
+      font-family: 'Noto Serif JP', serif; font-size: 13px;
+      letter-spacing: 0.2em; cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s, opacity 0.2s;
+    }
+    .btn-reserve:hover:not(:disabled) {
+      background: var(--br-dk); box-shadow: 0 4px 18px rgba(92,52,35,0.28);
+    }
+    .btn-reserve:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    /* ── Modal ──────────────────────────────────────────────────────── */
+    .modal-wrap {
+      position: fixed; inset: 0; z-index: 500;
+      display: flex; align-items: flex-end;
+      pointer-events: none; opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .modal-wrap.open { pointer-events: all; opacity: 1; }
+    .modal-bg {
+      position: absolute; inset: 0;
+      background: rgba(30,15,5,0.52);
+    }
+    .modal-card {
+      position: relative; z-index: 1;
+      width: 100%; max-height: 92vh; overflow-y: auto;
+      background: white; border-radius: 14px 14px 0 0;
+      padding: 28px 20px 52px;
+      transform: translateY(100%);
+      transition: transform 0.38s cubic-bezier(0.4,0,0.2,1);
+    }
+    .modal-wrap.open .modal-card { transform: translateY(0); }
+    .modal-grip {
+      width: 36px; height: 4px; border-radius: 2px;
+      background: rgba(92,52,35,0.15);
+      margin: 0 auto 24px;
+    }
+    .modal-title {
+      font-size: 14px; letter-spacing: 0.2em; font-weight: 500;
+      text-align: center; margin-bottom: 22px;
+    }
+    .modal-summary {
+      background: var(--be-lt); border-radius: 4px;
+      overflow: hidden; margin-bottom: 22px;
+    }
+    .modal-row {
+      display: flex; gap: 12px; align-items: baseline;
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(92,52,35,0.07);
+    }
+    .modal-row:last-child { border-bottom: none; }
+    .modal-key { font-size: 9.5px; color: var(--go); min-width: 68px; letter-spacing: 0.08em; }
+    .modal-val { font-size: 13px; flex: 1; line-height: 1.5; }
+
+    .modal-err {
+      font-size: 11px; color: var(--err);
+      background: rgba(192,57,43,0.06);
+      border: 1px solid rgba(192,57,43,0.2);
+      border-radius: 4px; padding: 10px 14px;
+      margin-bottom: 14px; text-align: center;
+      display: none; letter-spacing: 0.03em;
+    }
+    .modal-actions { display: flex; flex-direction: column; gap: 10px; }
+
+    .btn-confirm {
+      width: 100%; padding: 16px;
+      background: var(--br); color: white; border: none; border-radius: 4px;
+      font-family: 'Noto Serif JP', serif; font-size: 13px;
+      letter-spacing: 0.2em; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      transition: background 0.2s;
+    }
+    .btn-confirm:hover:not(:disabled) { background: var(--br-dk); }
+    .btn-confirm:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-modal-back {
+      width: 100%; padding: 14px; background: none;
+      border: 1px solid rgba(92,52,35,0.22); border-radius: 4px;
+      font-family: 'Noto Serif JP', serif; font-size: 12px;
+      letter-spacing: 0.1em; color: var(--br-md); cursor: pointer;
+    }
+
+    /* Spinner */
+    .spinner {
+      width: 16px; height: 16px;
+      border: 2px solid rgba(255,255,255,0.3); border-top-color: white;
+      border-radius: 50%; animation: spin 0.75s linear infinite;
+      display: none; flex-shrink: 0;
+    }
+    .btn-confirm.loading .spinner { display: block; }
+    .btn-confirm.loading .btn-lbl { opacity: 0.8; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Success state */
+    .success-state {
+      text-align: center; padding: 16px 0 8px;
+      display: none;
+    }
+    .success-ico {
+      font-size: 30px; color: var(--go); margin-bottom: 18px;
+    }
+    .success-ttl {
+      font-size: 15px; letter-spacing: 0.18em; font-weight: 500;
+      margin-bottom: 14px;
+    }
+    .success-body {
+      font-size: 12px; color: var(--br-md); line-height: 2;
+      letter-spacing: 0.04em; margin-bottom: 24px;
+    }
+
+    /* ── Success page (full screen) ────────────────────────────────── */
+    #success-page {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: var(--be);
+      z-index: 9999;
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .success-pg-wrap {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 64px 32px;
+      text-align: center;
+    }
+    .success-pg-en {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 10px;
+      letter-spacing: 0.55em;
+      color: var(--go);
+      margin-bottom: 10px;
+    }
+    .success-pg-logo {
+      font-size: 48px;
+      letter-spacing: 0.18em;
+      font-weight: 300;
+      line-height: 1;
+    }
+    .success-pg-logo span {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 0.52em;
+      font-weight: 300;
+    }
+    .success-pg-line {
+      width: 40px; height: 1px;
+      background: var(--go);
+      margin: 18px auto 36px;
+    }
+    .success-pg-ornament {
+      font-size: 18px; color: var(--go);
+      margin-bottom: 20px;
+    }
+    .success-pg-title {
+      font-size: 16px;
+      letter-spacing: 0.2em;
+      font-weight: 500;
+      margin-bottom: 18px;
+    }
+    .success-pg-msg {
+      font-size: 12px;
+      color: var(--br-md);
+      line-height: 2.3;
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+    }
+    .success-pg-line-btn {
+      display: block;
+      margin: 0 auto 44px;
+    }
+    .btn-close-page {
+      font-family: inherit;
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--br-md);
+      background: none;
+      border: 1px solid rgba(92,52,35,0.3);
+      border-radius: 40px;
+      padding: 13px 40px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn-close-page:hover { background: rgba(92,52,35,0.05); }
+
+    @media (max-width: 360px) {
+      .menu-cards { gap: 8px; }
+      .mcard-body { padding: 10px 9px; }
+      .mcard-ja { font-size: 11px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── Page header ─────────────────────────────────────────────────── -->
+<div class="page-hd">
+  <p class="page-hd-en">RESERVATION</p>
+  <h1 class="page-hd-ja">環 -wa- ご予約</h1>
+  <div class="page-hd-line"></div>
+</div>
+
+<!-- ── Notice ──────────────────────────────────────────────────────── -->
+<section id="notice">
+  <p class="notice-lbl">お知らせ</p>
+  <div class="notice-txt">
+    ・12歳以下のお客様は、保護者の方ご同伴でのご利用をお願いいたします。<br>
+    ・店内環境の都合上、ペット同伴でのご来店はご遠慮いただいております。<br>
+    ・お持ち込み素材につきましては、素材や状態によって加工が難しい場合がございます。事前に公式LINEよりご相談いただけますとスムーズにご案内可能です。
+  </div>
+  <div class="notice-txt">
+    その他ご不明点やご相談は、公式LINEよりお気軽にお問い合わせください。<br>
+    ご予約前のご質問はもちろん、<br>
+    ・金属アレルギーについて　・予約時間の変更 / 遅刻のご連絡<br>
+    ・営業時間外のご相談　・素材やデザインについて<br>
+    などもLINEにて対応しております。<br>
+    ご来店前に友達追加していただくと、当日のご案内もスムーズです。
+  </div>
+  <a class="notice-line-btn" href="https://lin.ee/OBgnuvj" target="_blank" rel="noopener noreferrer">
+    <img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png" alt="友だち追加" height="36" style="border:0;display:block;">
+  </a>
+</section>
+
+<!-- ── Booking form ─────────────────────────────────────────────────── -->
+<div id="booking">
+
+  <!-- ① メニュー選択 ──────────────────────────────────────────────── -->
+  <div class="bsec active" id="sec1">
+    <div class="bsec-hd" onclick="handleHdClick(1)">
+      <div class="bsec-badge">
+        <span class="badge-num">1</span>
+        <span class="badge-chk">✓</span>
+      </div>
+      <span class="bsec-title">メニュー選択</span>
+      <span class="bsec-val" id="sec1-val"></span>
+      <button class="bsec-edit" onclick="editSection(event,1)">変更</button>
+    </div>
+    <div class="bsec-body">
+      <div class="bsec-inner">
+        <div class="bsec-pad">
+          <div class="menu-cards">
+            <div class="mcard" id="mcard-spoon" onclick="selectMenu('spoon')">
+              <div class="mcard-img-wrap">
+                <img class="mcard-img" src="images/spoon.jpg" alt="スプーンリング"
+                     onerror="this.closest('.mcard-img-wrap').style.background='var(--be)';this.remove()">
+              </div>
+              <div class="mcard-body">
+                <p class="mcard-en">SPOON RING</p>
+                <p class="mcard-ja">スプーンリング</p>
+                <p class="mcard-price">¥6,500<span style="font-size:10px;font-family:inherit;">〜</span></p>
+                <p class="mcard-desc">アンティークスプーンを<br>指輪に仕上げる体験</p>
+              </div>
+              <div class="mcard-chk">✓</div>
+            </div>
+            <div class="mcard" id="mcard-coin" onclick="selectMenu('coin')">
+              <div class="mcard-img-wrap">
+                <img class="mcard-img" src="images/coin.jpeg" alt="コインリング"
+                     onerror="this.closest('.mcard-img-wrap').style.background='var(--be)';this.remove()">
+              </div>
+              <div class="mcard-body">
+                <p class="mcard-en">COIN RING</p>
+                <p class="mcard-ja">コインリング</p>
+                <p class="mcard-price">¥6,500<span style="font-size:10px;font-family:inherit;">〜</span></p>
+                <p class="mcard-desc">世界各地のコインを<br>指輪に仕上げる体験</p>
+              </div>
+              <div class="mcard-chk">✓</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ② 人数 & 日程 ───────────────────────────────────────────────── -->
+  <div class="bsec locked" id="sec2">
+    <div class="bsec-hd" onclick="handleHdClick(2)">
+      <div class="bsec-badge">
+        <span class="badge-num">2</span>
+        <span class="badge-chk">✓</span>
+      </div>
+      <span class="bsec-title">人数 &amp; 日程</span>
+      <span class="bsec-val" id="sec2-val"></span>
+      <button class="bsec-edit" onclick="editSection(event,2)">変更</button>
+    </div>
+    <div class="bsec-body">
+      <div class="bsec-inner">
+        <div class="bsec-pad">
+
+          <!-- 人数ステッパー -->
+          <div class="stepper-row">
+            <div>
+              <div class="stepper-lbl">大人の人数<span style="color:var(--err);margin-left:3px;">*</span></div>
+            </div>
+            <div class="stepper">
+              <button class="stepper-btn" id="adults-dec" onclick="changeCount('adults',-1)" disabled>−</button>
+              <div class="stepper-cnt" id="adults-cnt">0</div>
+              <button class="stepper-btn" id="adults-inc" onclick="changeCount('adults',1)">+</button>
+            </div>
+          </div>
+
+          <div class="stepper-row">
+            <div>
+              <div class="stepper-lbl">お子様の人数</div>
+              <div class="stepper-sub">12歳以下</div>
+            </div>
+            <div class="stepper">
+              <button class="stepper-btn" id="children-dec" onclick="changeCount('children',-1)" disabled>−</button>
+              <div class="stepper-cnt" id="children-cnt">0</div>
+              <button class="stepper-btn" id="children-inc" onclick="changeCount('children',1)">+</button>
+            </div>
+          </div>
+
+          <div class="sec-divider"></div>
+
+          <!-- カレンダー -->
+          <div class="cal-wrap cal-off" id="cal-wrap">
+            <div class="cal-nav">
+              <button class="cal-nav-btn" id="cal-prev" onclick="changeCalMonth(-1)" disabled>&#8249;</button>
+              <span class="cal-nav-label" id="cal-month"></span>
+              <button class="cal-nav-btn" id="cal-next" onclick="changeCalMonth(1)">&#8250;</button>
+            </div>
+            <div class="cal-grid" id="cal-grid"></div>
+          </div>
+          <p class="cal-hint" id="cal-hint">人数を選択すると日程が選択できます</p>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ③ 時間帯 ────────────────────────────────────────────────────── -->
+  <div class="bsec locked" id="sec3">
+    <div class="bsec-hd" onclick="handleHdClick(3)">
+      <div class="bsec-badge">
+        <span class="badge-num">3</span>
+        <span class="badge-chk">✓</span>
+      </div>
+      <span class="bsec-title">時間帯</span>
+      <span class="bsec-val" id="sec3-val"></span>
+      <button class="bsec-edit" onclick="editSection(event,3)">変更</button>
+    </div>
+    <div class="bsec-body">
+      <div class="bsec-inner">
+        <div class="bsec-pad">
+          <div class="time-grid" id="time-grid"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ④⑤ ご要望 & お客様情報（時間選択後にフェードイン） ──────────── -->
+  <div class="prog-secs" id="prog-secs">
+
+    <!-- ④ ご要望 -->
+    <div class="prog-sec">
+      <div class="prog-sec-hd">
+        <div class="prog-badge">4</div>
+        <span class="prog-title">ご要望</span>
+      </div>
+      <div class="prog-body">
+        <div class="field">
+          <textarea id="inputNotes" rows="4"
+            placeholder="アレルギーや素材のご希望、その他ご要望があればご記入ください"
+            oninput="onNotesChange()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- ⑤ お客様情報 -->
+    <div class="prog-sec">
+      <div class="prog-sec-hd">
+        <div class="prog-badge">5</div>
+        <span class="prog-title">お客様情報</span>
+      </div>
+      <div class="prog-body">
+        <div class="field">
+          <label class="field-lbl" for="inputName">お名前<span class="req">*</span></label>
+          <input type="text" id="inputName" placeholder="山田 花子" oninput="onContactChange()">
+          <span class="field-err" id="err-Name">お名前を入力してください</span>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="inputPhone">電話番号<span class="req">*</span></label>
+          <input type="tel" id="inputPhone" placeholder="090-0000-0000" oninput="onContactChange()">
+          <span class="field-err" id="err-Phone">正しい電話番号を入力してください</span>
+        </div>
+        <div class="field">
+          <label class="field-lbl" for="inputEmail">メールアドレス<span class="req">*</span></label>
+          <input type="email" id="inputEmail" placeholder="example@email.com" oninput="onContactChange()">
+          <span class="field-err" id="err-Email">正しいメールアドレスを入力してください</span>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /prog-secs -->
+
+  <!-- 予約ボタン -->
+  <div id="submit-area">
+    <button class="btn-reserve" id="btnReserve" onclick="openModal()" disabled>
+      この内容で予約する
+    </button>
+  </div>
+
+</div><!-- /booking -->
+
+<!-- ── 確認モーダル ─────────────────────────────────────────────────── -->
+<div class="modal-wrap" id="modal">
+  <div class="modal-bg" onclick="closeModal()"></div>
+  <div class="modal-card">
+    <div class="modal-grip"></div>
+
+    <!-- 確認コンテンツ -->
+    <div id="modal-main">
+      <h2 class="modal-title">予約内容の確認</h2>
+      <div class="modal-summary" id="modal-summary"></div>
+      <div class="modal-err" id="modal-err"></div>
+      <div class="modal-actions">
+        <button class="btn-confirm" id="btnConfirm" onclick="submitBooking()">
+          <div class="spinner"></div>
+          <span class="btn-lbl">予約を確定する</span>
+        </button>
+        <button class="btn-modal-back" onclick="closeModal()">戻る</button>
+      </div>
+    </div>
+
+    <!-- 完了 -->
+    <div class="success-state" id="success-state">
+      <div class="success-ico">✦</div>
+      <p class="success-ttl">ご予約を受け付けました</p>
+      <p class="success-body">
+        ご予約いただきありがとうございます。<br>
+        確認のご連絡をお送りします。
+      </p>
+      <button class="btn-modal-back" onclick="closeModal()">閉じる</button>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════════
+//  設定
+// ══════════════════════════════════════════════════════════════════════
+const ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbypFxo2Ea0i7tFU16Xj9FKsl9NEY4cDdoLHKvQBMnwx3ff37VFtErkHX7JAq2hssdh3/exec";
+
+
+// 定休日（0=日 1=月 2=火 3=水 4=木 5=金 6=土）
+const CLOSED_WEEKDAYS = [2];
+
+// 特定休業日（例: ['2026-08-13', '2026-08-14']）
+const CLOSED_DATES = [];
+
+// 時間帯
+const TIME_START  = 12 * 60;  // 12:00
+const TIME_END    = 18 * 60;  // 最終開始 18:00 → 終了 19:00
+const TIME_STEP   = 30;       // 30分刻み
+const EXP_MIN     = 60;       // 体験所要時間（分）
+
+// 予約済み枠 { spoon: { 'YYYY-MM-DD': ['HH:MM',...] }, coin: { ... } }
+// メニューごとに独立した枠を管理。ページ読み込み時にGASから取得。
+let BOOKED_SLOTS = { spoon: {}, coin: {} };
+
+// ══════════════════════════════════════════════════════════════════════
+//  状態
+// ══════════════════════════════════════════════════════════════════════
+const S = {
+  menu:     null,  // 'spoon' | 'coin'
+  adults:   0,
+  children: 0,
+  date:     null,  // 'YYYY-MM-DD'
+  time:     null,  // 'HH:MM-HH:MM'
+  notes:    '',
+  name:     '',
+  phone:    '',
+  email:    '',
+};
+
+let calYear, calMonth;
+
+// ══════════════════════════════════════════════════════════════════════
+//  ユーティリティ
+// ══════════════════════════════════════════════════════════════════════
+const pad  = n => String(n).padStart(2, '0');
+const m2t  = m => `${pad(Math.floor(m / 60))}:${pad(m % 60)}`;
+const t2m  = t => { const [h, m] = t.split(':'); return +h * 60 + +m; };
+const d2s  = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+
+function jaDate(s) {
+  if (!s) return '';
+  const [y, mo, d] = s.split('-').map(Number);
+  const dow = ['日','月','火','水','木','金','土'][new Date(y, mo-1, d).getDay()];
+  return `${y}年${mo}月${d}日（${dow}）`;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  セクション管理
+// ══════════════════════════════════════════════════════════════════════
+function secEl(n) { return document.getElementById(`sec${n}`); }
+
+function setState(n, st) {
+  const el = secEl(n);
+  if (el) el.className = `bsec ${st}`;
+}
+
+function setVal(n, txt) {
+  const el = document.getElementById(`sec${n}-val`);
+  if (el) el.textContent = txt;
+}
+
+function activateSec(n) {
+  setState(n, 'active');
+  setTimeout(() => {
+    const el = secEl(n);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 80);
+}
+
+function completeSec(n, summary) {
+  setVal(n, summary);
+  setState(n, 'done');
+}
+
+function handleHdClick(n) {
+  // done セクションをクリックで開閉（active ↔ done）
+  const el = secEl(n);
+  if (!el || el.classList.contains('locked')) return;
+  if (el.classList.contains('done')) setState(n, 'active');
+}
+
+function editSection(e, n) {
+  e.stopPropagation();
+  setState(n, 'active');
+
+  // 後続セクションをリセット
+  for (let i = n + 1; i <= 3; i++) {
+    setState(i, 'locked');
+    setVal(i, '');
+  }
+  hideProg();
+
+  // 状態リセット
+  if (n <= 1) {
+    S.menu = null;
+    document.getElementById('mcard-spoon').classList.remove('selected');
+    document.getElementById('mcard-coin').classList.remove('selected');
+  }
+  if (n <= 2) {
+    S.date = null;
+    renderCalendar();
+  }
+  if (n <= 3) { S.time = null; }
+
+  updateSubmit();
+  setTimeout(() => secEl(n).scrollIntoView({ behavior: 'smooth', block: 'start' }), 50);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ① メニュー選択
+// ══════════════════════════════════════════════════════════════════════
+function selectMenu(type) {
+  S.menu = type;
+  document.getElementById('mcard-spoon').classList.toggle('selected', type === 'spoon');
+  document.getElementById('mcard-coin').classList.toggle('selected', type === 'coin');
+
+  const label = type === 'spoon' ? 'スプーンリング' : 'コインリング';
+  setTimeout(() => {
+    completeSec(1, label);
+    activateSec(2);
+  }, 200);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ② 人数
+// ══════════════════════════════════════════════════════════════════════
+function changeCount(type, delta) {
+  S[type] = Math.max(0, Math.min(4, S[type] + delta));
+  document.getElementById(`${type}-cnt`).textContent = S[type];
+  document.getElementById(`${type}-dec`).disabled = S[type] <= 0;
+  document.getElementById(`${type}-inc`).disabled = S[type] >= 4;
+
+  const calWrap = document.getElementById('cal-wrap');
+  const calHint = document.getElementById('cal-hint');
+
+  if (S.adults >= 1) {
+    calWrap.classList.remove('cal-off');
+    calHint.style.display = 'none';
+  } else {
+    calWrap.classList.add('cal-off');
+    calHint.style.display = 'block';
+    if (S.date) { S.date = null; renderCalendar(); }
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ② カレンダー
+// ══════════════════════════════════════════════════════════════════════
+function initCalendar() {
+  const now = new Date();
+  calYear  = now.getFullYear();
+  calMonth = now.getMonth();
+  renderCalendar();
+}
+
+function changeCalMonth(delta) {
+  calMonth += delta;
+  if (calMonth < 0)  { calMonth = 11; calYear--; }
+  if (calMonth > 11) { calMonth = 0;  calYear++; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  document.getElementById('cal-month').textContent = `${calYear}年 ${calMonth + 1}月`;
+
+  const isCurMon = calYear === today.getFullYear() && calMonth === today.getMonth();
+  document.getElementById('cal-prev').disabled = isCurMon;
+
+  const firstDOW  = new Date(calYear, calMonth, 1).getDay();
+  const daysInMon = new Date(calYear, calMonth + 1, 0).getDate();
+
+  const DOW = ['日','月','火','水','木','金','土'];
+  let html = DOW.map((d, i) =>
+    `<div class="cal-dow ${i===0?'sun':i===6?'sat':''}">${d}</div>`
+  ).join('');
+
+  for (let i = 0; i < firstDOW; i++) html += '<div class="cal-empty"></div>';
+
+  for (let d = 1; d <= daysInMon; d++) {
+    const date    = new Date(calYear, calMonth, d);
+    const dateStr = d2s(date);
+    const dow     = date.getDay();
+    const isPast  = date < today;
+    const isClosed = CLOSED_WEEKDAYS.includes(dow) || CLOSED_DATES.includes(dateStr);
+    const isToday  = date.getTime() === today.getTime();
+
+    const cls = ['cal-day'];
+    if (dow === 0) cls.push('sun');
+    if (dow === 6) cls.push('sat');
+    if (isPast || isClosed) cls.push('disabled');
+    if (isClosed && !isPast) cls.push('closed');
+    if (isToday) cls.push('today');
+    if (dateStr === S.date) cls.push('selected');
+
+    const clickable = !isPast && !isClosed;
+    html += `<div class="${cls.join(' ')}"${clickable ? ` onclick="selectDate('${dateStr}')"` : ''}>${d}</div>`;
+  }
+
+  document.getElementById('cal-grid').innerHTML = html;
+}
+
+function selectDate(dateStr) {
+  if (S.adults < 1) return;
+  S.date = dateStr;
+  renderCalendar();
+
+  const adultsLbl   = `大人${S.adults}名`;
+  const childrenLbl = S.children > 0 ? ` / お子様${S.children}名` : '';
+  const summary     = `${adultsLbl}${childrenLbl} / ${jaDate(dateStr)}`;
+
+  setTimeout(() => {
+    completeSec(2, summary);
+    renderTimeSlots(dateStr);
+    activateSec(3);
+  }, 200);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ③ 時間帯
+// ══════════════════════════════════════════════════════════════════════
+function isBlocked(dateStr, startMin) {
+  const menuSlots = BOOKED_SLOTS[S.menu] || {};
+  const booked = (menuSlots[dateStr] || []).map(t2m);
+  if (booked.some(b => startMin === b || startMin === b + 30)) return true;
+
+  // 当日予約: 現在時刻+30分未満の枠はブロック
+  const todayStr = d2s(new Date());
+  if (dateStr === todayStr) {
+    const now = new Date();
+    const nowMin = now.getHours() * 60 + now.getMinutes();
+    if (startMin < nowMin + 30) return true;
+  }
+
+  return false;
+}
+
+function renderTimeSlots(dateStr) {
+  let html = '';
+  for (let m = TIME_START; m <= TIME_END; m += TIME_STEP) {
+    const timeStr  = `${m2t(m)}-${m2t(m + EXP_MIN)}`;
+    const blocked  = isBlocked(dateStr, m);
+    const selected = S.time === timeStr;
+
+    const cls = ['tslot'];
+    if (blocked)  cls.push('blocked');
+    if (selected) cls.push('selected');
+
+    html += `<div class="${cls.join(' ')}"${!blocked ? ` onclick="selectTime('${timeStr}')"` : ''}>
+      <div class="tslot-time">${m2t(m)}&thinsp;-&thinsp;${m2t(m + EXP_MIN)}</div>
+      <div class="tslot-avail">${blocked ? '満席' : '予約可'}</div>
+    </div>`;
+  }
+  document.getElementById('time-grid').innerHTML = html;
+}
+
+function selectTime(timeStr) {
+  S.time = timeStr;
+  renderTimeSlots(S.date);
+
+  setTimeout(() => {
+    completeSec(3, timeStr);
+    showProg();
+  }, 160);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  ④⑤ プログレッシブセクション
+// ══════════════════════════════════════════════════════════════════════
+function showProg() {
+  const el = document.getElementById('prog-secs');
+  el.classList.add('visible');
+  setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'start' }), 80);
+}
+
+function hideProg() {
+  document.getElementById('prog-secs').classList.remove('visible');
+  S.notes = document.getElementById('inputNotes').value = '';
+  S.name  = document.getElementById('inputName').value  = '';
+  S.phone = document.getElementById('inputPhone').value = '';
+  S.email = document.getElementById('inputEmail').value = '';
+  ['Name','Phone','Email'].forEach(f => {
+    document.getElementById(`err-${f}`).classList.remove('show');
+    document.getElementById(`input${f}`).classList.remove('err');
+  });
+  updateSubmit();
+}
+
+function onNotesChange() {
+  S.notes = document.getElementById('inputNotes').value;
+}
+
+function onContactChange() {
+  S.name  = document.getElementById('inputName').value.trim();
+  S.phone = document.getElementById('inputPhone').value.trim();
+  S.email = document.getElementById('inputEmail').value.trim();
+  updateSubmit();
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  送信ボタン制御
+// ══════════════════════════════════════════════════════════════════════
+function updateSubmit() {
+  const ready =
+    S.menu && S.adults >= 1 && S.date && S.time &&
+    S.name &&
+    S.phone && /[\d\-\+\(\)\s]{7,}/.test(S.phone) &&
+    S.email && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email);
+
+  document.getElementById('btnReserve').disabled = !ready;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  バリデーション
+// ══════════════════════════════════════════════════════════════════════
+function validate() {
+  let ok = true;
+  const checks = [
+    ['Name',  S.name,  'お名前を入力してください',         () => !!S.name],
+    ['Phone', S.phone, '正しい電話番号を入力してください',   () => /[\d\-\+\(\)\s]{7,}/.test(S.phone)],
+    ['Email', S.email, '正しいメールアドレスを入力してください', () => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(S.email)],
+  ];
+  checks.forEach(([f, , msg, test]) => {
+    const errEl = document.getElementById(`err-${f}`);
+    const inpEl = document.getElementById(`input${f}`);
+    if (!test()) {
+      errEl.textContent = msg;
+      errEl.classList.add('show');
+      inpEl.classList.add('err');
+      ok = false;
+    } else {
+      errEl.classList.remove('show');
+      inpEl.classList.remove('err');
+    }
+  });
+  return ok;
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  モーダル
+// ══════════════════════════════════════════════════════════════════════
+function buildSummary() {
+  const menuLbl = S.menu === 'spoon' ? 'スプーンリング' : 'コインリング';
+  const pplLbl  = `大人${S.adults}名${S.children > 0 ? ` / お子様${S.children}名` : ''}`;
+
+  const rows = [
+    ['メニュー',   menuLbl],
+    ['日程',       jaDate(S.date)],
+    ['時間帯',     S.time],
+    ['人数',       pplLbl],
+    ['お名前',     S.name],
+    ['電話番号',   S.phone],
+    ['メール',     S.email],
+    ...(S.notes.trim() ? [['ご要望', S.notes.trim()]] : []),
+  ];
+
+  document.getElementById('modal-summary').innerHTML = rows.map(([k, v]) =>
+    `<div class="modal-row">
+       <span class="modal-key">${k}</span>
+       <span class="modal-val">${v}</span>
+     </div>`
+  ).join('');
+}
+
+function openModal() {
+  if (!validate()) return;
+  buildSummary();
+  document.getElementById('modal-err').style.display = 'none';
+  document.getElementById('modal-main').style.display = '';
+  document.getElementById('success-state').style.display = 'none';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  送信
+// ══════════════════════════════════════════════════════════════════════
+function submitBooking() {
+  const btn = document.getElementById('btnConfirm');
+  btn.disabled = true;
+  btn.classList.add('loading');
+  document.getElementById('modal-err').style.display = 'none';
+
+  const payload = {
+    date:     S.date,
+    time:     S.time,
+    menu:     S.menu === 'spoon' ? 'スプーンリング' : 'コインリング',
+    adults:   String(S.adults),
+    children: String(S.children),
+    name:     S.name,
+    phone:    S.phone,
+    email:    S.email,
+    notes:    S.notes.trim(),
+  };
+
+  // エンドポイント未設定時はデモ動作
+  if (!ENDPOINT_URL || ENDPOINT_URL === 'ここにデプロイ後のURLを貼る') {
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.classList.remove('loading');
+      showSuccess();
+    }, 1500);
+    return;
+  }
+
+  // GASへ送信
+  // GAS の302リダイレクト時にPOSTボディが消える問題を回避するため、
+  // データをURLパラメータに乗せたGETリクエストを使用する。
+  const params = new URLSearchParams();
+  Object.entries(payload).forEach(([k, v]) => params.set(k, String(v)));
+
+  fetch(`${ENDPOINT_URL}?${params.toString()}`, { mode: 'no-cors' })
+  .then(() => {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    showSuccess();
+  })
+  .catch(() => {
+    btn.disabled = false;
+    btn.classList.remove('loading');
+    const errEl = document.getElementById('modal-err');
+    errEl.textContent = '送信に失敗しました。時間をおいて再度お試しください。';
+    errEl.style.display = 'block';
+  });
+}
+
+function showSuccess() {
+  // モーダルを閉じる
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+
+  // ブラウザバック防止
+  history.pushState(null, '', location.href);
+  window.addEventListener('popstate', function() {
+    history.pushState(null, '', location.href);
+  });
+
+  // 完了ページ表示
+  document.getElementById('success-page').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function closePage() {
+  window.close();
+  // window.close() が効かない場合（ブラウザ制限）はLINEへ
+  setTimeout(function() {
+    window.location.href = 'https://lin.ee/OBgnuvj';
+  }, 400);
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  予約済み枠の自動取得
+// ══════════════════════════════════════════════════════════════════════
+async function loadBookedSlots() {
+  if (!ENDPOINT_URL || ENDPOINT_URL === 'ここにデプロイ後のURLを貼る') return;
+  try {
+    const res  = await fetch(`${ENDPOINT_URL}?action=slots`);
+    const json = await res.json();
+    if (json.slots) {
+      if (json.slots.spoon || json.slots.coin) {
+        BOOKED_SLOTS = { spoon: json.slots.spoon || {}, coin: json.slots.coin || {} };
+      } else {
+        // 旧形式フォールバック: 両メニュー共通として扱う
+        BOOKED_SLOTS = { spoon: json.slots, coin: json.slots };
+      }
+    }
+  } catch (e) {
+    console.warn('予約済み枠の取得に失敗しました:', e);
+  }
+}
+
+// ══════════════════════════════════════════════════════════════════════
+//  初期化
+// ══════════════════════════════════════════════════════════════════════
+(function init() {
+  initCalendar();
+  updateSubmit();
+  loadBookedSlots();
+})();
+</script>
+
+<!-- 予約完了ページ（フルスクリーン） -->
+<div id="success-page">
+  <div class="success-pg-wrap">
+    <p class="success-pg-en">RESERVATION</p>
+    <div class="success-pg-logo">環 <span>-wa-</span></div>
+    <div class="success-pg-line"></div>
+    <div class="success-pg-ornament">✦</div>
+    <h2 class="success-pg-title">ご予約ありがとうございます</h2>
+    <p class="success-pg-msg">
+      ご予約確認メールをお送りしました。<br>
+      迷惑メールフォルダに届く場合がありますので、<br>
+      届いていない場合はご確認ください。<br>
+      <br>
+      ご不明な点やご相談は、<br>
+      公式LINEよりお気軽にどうぞ。
+    </p>
+    <a href="https://lin.ee/OBgnuvj" class="success-pg-line-btn" target="_blank">
+      <img src="https://scdn.line-apps.com/n/line_add_friends/btn/ja.png"
+           alt="友だち追加" height="40" style="border:none;display:block;">
+    </a>
+    <button class="btn-close-page" onclick="closePage()">ページを閉じる</button>
+  </div>
+</div>
+
+</body>
+</html>
